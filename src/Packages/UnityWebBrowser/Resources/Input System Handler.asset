@@ -28,6 +28,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Scroll Input
       m_Flags: 0
+    - m_Name: 
+      m_Id: 3cf1b26a-b6c2-4be4-afc0-83621dd87492
+      m_Path: <OculusTouchController>{RightHand}/{Primary2DAxis}
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Scroll Input
+      m_Flags: 0
     m_Flags: 0
   scrollValue: 0.2
   pointPosition:
