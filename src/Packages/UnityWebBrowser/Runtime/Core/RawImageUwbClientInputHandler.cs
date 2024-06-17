@@ -36,7 +36,7 @@ namespace VoltstroStudios.UnityWebBrowser.Core
         /// <summary>
         ///     Disable usage of keyboard
         /// </summary>
-        [Tooltip("Disable usage of keyboard")] public bool disableKeyboardInputs;
+        [Tooltip("Disable usage of keyboard")] public bool disableKeyboardInputs=false;
 
         private Coroutine keyboardAndMouseHandlerCoroutine;
         private Vector2 lastSuccessfulMousePositionSent;
@@ -57,7 +57,7 @@ namespace VoltstroStudios.UnityWebBrowser.Core
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            if (GetMousePosition(out Vector2 pos))
+            if (GetMousePosition(eventData,out Vector2 pos))
                 browserClient.SendMouseClick(pos, eventData.clickCount, clickType, MouseEventType.Down);
         }
 
@@ -90,7 +90,7 @@ namespace VoltstroStudios.UnityWebBrowser.Core
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            if (GetMousePosition(out Vector2 pos))
+            if (GetMousePosition(eventData,out Vector2 pos))
                 browserClient.SendMouseClick(pos, eventData.clickCount, clickType, MouseEventType.Up);
         }
 
@@ -144,6 +144,28 @@ namespace VoltstroStudios.UnityWebBrowser.Core
             }
 
             return false;
+        }
+
+        public bool GetMousePosition(PointerEventData eventData, out Vector2 pos)
+        {
+            pos = new Vector2();
+            RectTransform uiImageObjectRectTransform = image.rectTransform;
+            var rayCast = eventData.pointerCurrentRaycast;
+            var screenPosition = eventData.pressEventCamera.WorldToScreenPoint(rayCast.worldPosition);
+            if(!RectTransformUtility.ScreenPointToLocalPointInRectangle(uiImageObjectRectTransform, screenPosition, eventData.pressEventCamera, out var localCursor))
+                return false;
+            Rect uiImageObjectRect = uiImageObjectRectTransform.rect;
+            Vector2 ptPivotCancelledLocation = new(localCursor.x - uiImageObjectRect.x,
+                localCursor.y - uiImageObjectRect.y);
+            Vector2 ptLocationRelativeToImageInScreenCoordinates =
+                new(ptPivotCancelledLocation.x, ptPivotCancelledLocation.y);
+            pos.x = ptLocationRelativeToImageInScreenCoordinates.x / uiImageObjectRect.width;
+            pos.y = -(ptLocationRelativeToImageInScreenCoordinates.y / uiImageObjectRect.height) + 1;
+            Texture imageTexture = image.texture;
+            pos.x *= imageTexture.width;
+            pos.y *= imageTexture.height;
+            return true;
+
         }
 
         private void StopKeyboardAndMouseHandler()
